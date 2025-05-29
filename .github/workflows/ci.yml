@@ -82,4 +82,4 @@ jobs:
       - run: |
           flutter pub get
           flutter clean 
-          flutter build appbundle --no-codesign
+          flutter build appbundle --debug --no-shrink
