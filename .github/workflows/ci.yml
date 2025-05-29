@@ -35,3 +35,51 @@ jobs:
 
       - name: Run tests
         run: flutter test 
+        
+  build_ios:
+    name: Build flutter IOS
+    needs: [flutter_test]
+
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin' # Use 'temurin' for OpenJDK 17
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2 # will allow you to run flutter commands
+        with:
+          channel: 'stable' # Use 'stable' channel for production-ready Flutter SDK
+      - run: |
+          flutter pub get
+          flutter clean 
+          flutter build ios --no-codesign
+    
+  build_appbundle:
+    name: Build flutter Android App Bundle
+    needs: [flutter_test]
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin' # Use 'temurin' for OpenJDK 17
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2 # will allow you to run flutter commands
+        with:
+          channel: 'stable' # Use 'stable' channel for production-ready Flutter SDK
+      - run: |
+          flutter pub get
+          flutter clean 
+          flutter build appbundle --no-codesign
