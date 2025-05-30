@@ -110,7 +110,6 @@ jobs:
       - name: upload bundle artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error # Fail the job if no files are found
@@ -147,3 +146,14 @@ jobs:
           path: |
             build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error # Fail the job if no files are found
+      
+      - name: check if Tag Exists
+        id: check_tag
+        run: |
+          if git tag --list | grep -q "${{ github.ref_name }}"; then
+            echo "Tag exists"
+            echo "tag_exists=true" >> $GITHUB_ENV
+          else
+            echo "Tag does not exist"
+            echo "tag_exists=false" >> $GITHUB_ENV
+          fi
