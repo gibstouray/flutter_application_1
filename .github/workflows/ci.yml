@@ -70,6 +70,13 @@ jobs:
           flutter pub get
           flutter clean 
           flutter build ios --no-codesign
+          
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Releases
+          path: |
+            build/ios_build.tar.gz
     
   build_appbundle:
     name: Build flutter Android App Bundle
@@ -94,6 +101,13 @@ jobs:
           flutter pub get
           flutter clean 
           flutter build appbundle
+          
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Releases
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
   
   build_apk:
     name: Build flutter Android apk
@@ -125,6 +139,6 @@ jobs:
           name: Releases
           path: |
             build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/bundle/release/app-release.aab
-            build/ois_build.tar.gz
+            # build/app/outputs/bundle/release/app-release.aab
+            # build/ois_build.tar.gz
           if-no-files-found: error # Fail the job if no files are found
