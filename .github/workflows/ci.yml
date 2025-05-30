@@ -112,7 +112,7 @@ jobs:
         with:
           name: app-release-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
-            build/app/outputs/bundle/release/app-bundle-release.aab
+            build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error # Fail the job if no files are found
 
   
