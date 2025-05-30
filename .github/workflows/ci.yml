@@ -83,26 +83,9 @@ jobs:
           flutter pub get
           flutter clean 
           flutter build appbundle
-
-  build_appbundle:
-    name: Build flutter Android APK
-    needs: [flutter_test]
-
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'temurin' # Use 'temurin' for OpenJDK 17
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2 # will allow you to run flutter commands
-        with:
-          channel: 'stable' # Use 'stable' channel for production-ready Flutter SDK
+  
+      - name: Build flutter Android APK
+        needs: [flutter_test]
       - run: |
           flutter pub get
           flutter clean 
