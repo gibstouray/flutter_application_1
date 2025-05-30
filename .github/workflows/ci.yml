@@ -150,12 +150,10 @@ jobs:
       - name: check if Tag Exists
         id: check_tag
         run: |
-          if git tag --list | grep -q "${{ github.ref_name }}"; then
-            echo "Tag exists"
-            echo "tag_exists=true" >> $GITHUB_ENV
+          if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
+            echo "TAG_EXISTS=true" >> $GITHUB_ENV
           else
-            echo "Tag does not exist"
-            echo "tag_exists=false" >> $GITHUB_ENV
+            echo "TAG_EXISTS=false" >> $GITHUB_ENV
           fi
 
       - name: Modify Tag
