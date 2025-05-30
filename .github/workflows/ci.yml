@@ -84,7 +84,7 @@ jobs:
             build/ios_build.tar.gz
     
   build_appbundle:
-    name: Build flutter Android App Bundle
+    name: Build Android App Bundle
     needs: [flutter_test]
 
     runs-on: ubuntu-latest
@@ -112,7 +112,7 @@ jobs:
         with:
           name: Releases
           path: |
-            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/bundle/release/app-bundle-release.aab
           if-no-files-found: error # Fail the job if no files are found
 
   
