@@ -84,8 +84,8 @@ jobs:
           flutter clean 
           flutter build appbundle
   
-      - name: Build flutter Android APK
-        needs: [flutter_test]
+    name: Build flutter Android APK
+    needs: [flutter_test]
       - run: |
           flutter pub get
           flutter clean 
