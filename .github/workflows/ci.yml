@@ -119,4 +119,8 @@ jobs:
           flutter clean 
           flutter build apk
 
-      
+      - name: Compress Archives and IPAs
+        run: |
+          cd build
+          tar -czf ios_build.tar.gz ios
+          
