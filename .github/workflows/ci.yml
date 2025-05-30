@@ -110,7 +110,7 @@ jobs:
       - name: upload bundle artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Releases
+          name: app-release-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error # Fail the job if no files are found
