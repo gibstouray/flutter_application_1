@@ -116,7 +116,7 @@ jobs:
         
         # Create Release
       - name: Create Release
-        uses: ncipollo/release-action@v1.12.0
+        uses: ncipollo/release-action@v1
         with:
           artifacts: "build/ios_build.tar.gz"
           tag: v${{ env.VERSION }}
