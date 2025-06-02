@@ -116,6 +116,7 @@ jobs:
             echo "TAG_EXISTS=true" >> $GITHUB_ENV
           else
             echo "TAG_EXISTS=false" >> $GITHUB_ENV
+            echo $GITHUB_ENV
           fi
 
         # Create Release
