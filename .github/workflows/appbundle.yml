@@ -16,11 +16,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      #- name: cache pub dependencies
-      #  uses: actions/cache@v4
-      #  with: 
-      #    path:  ~/.pub-cache
-      #    key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
+      - name: cache pub dependencies
+        uses: actions/cache@v2
+        with: 
+          path:  ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
 
       - name: Set up JDK
         uses: actions/setup-java@v2
@@ -52,12 +52,12 @@ jobs:
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties:
           echo "storeFile=keystore.jks" >> android/key.properties
-        
-  build_ios:
-    name: Build flutter IOS
+  
+  build_appbundle:
+    name: Build Android App Bundle
     needs: [flutter_test]
 
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -75,21 +75,16 @@ jobs:
       - run: |
           flutter pub get
           flutter clean 
-          flutter build ios --no-codesign
-
-      - name: Create tar.gz of iOS build
-        run: |
-          mkdir -p build
-          tar -czf build/ios_build.tar.gz build/ios/iphoneos/*.app
-      
-      - name: upload IOS build artifacts
+          flutter build appbundle
+          
+      - name: upload bundle artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Releases
           path: |
-            build/ios_build.tar.gz
+            build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error # Fail the job if no files are found
 
-       # Extract Version
+      # Extract Version
       - name: Extract version from pubspec.yaml
         id: extract_version
         run: |
@@ -118,6 +113,6 @@ jobs:
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "build/ios_build.tar.gz"
+          artifacts: "build/app/outputs/bundle/release/app-release.aab"
           tag: v${{ env.VERSION }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.TOKEN }}
