@@ -4,9 +4,9 @@ name: appbundle
 # It will also cache pub dependencies and set up the JDK and Flutter environment.
 on:
   workflow_dispatch: {}
-  push:
-    branches:
-      - dev
+  #push:
+  #  branches:
+  #    - dev
 
 jobs:
   flutter_test:
