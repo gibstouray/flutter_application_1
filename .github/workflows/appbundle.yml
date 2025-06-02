@@ -3,7 +3,7 @@ name: appbundle
 # It will also create a release with the built app bundle.
 # It will also cache pub dependencies and set up the JDK and Flutter environment.
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
   #push:
     branches:
       - dev
