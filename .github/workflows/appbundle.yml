@@ -107,6 +107,8 @@ jobs:
         run: |
           new_version="${{ env.VERSION }}-build-${{ github.run_number }}"
           echo "VERSION=$new_version" >> $GITHUB_ENV
+          rand_vers=$(shuf -1 1-1000)
+          echo "VERSION=v${new_version}-${rand_vers}" >> $GITHUB_ENV
 
       # Create Release
       - name: Create Release
@@ -114,7 +116,7 @@ jobs:
         with:
           artifacts: "build/app/outputs/bundle/release/app-release.aab"
           #tag: v${{ env.VERSION }}
-          tag: "v1.0.0-${{ github.run_number }}"
-          name: "Release v1.0.0-${{ github.run_number }}"
+          tag: "v1.0.0-${{ $VERSION }}"
+          name: "Release v1.0.0-${{ $VERSION }}"
           body: "Release of version v1.0.0-${{ github.run_number }}"
           #token: ${{ secrets.GITHUB_TOKEN }}
