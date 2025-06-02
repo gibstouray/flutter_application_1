@@ -112,6 +112,8 @@ jobs:
         id: modify_tag
         run: |
           new_version="${{ env.VERSION }}-build-${{ github.run_number }}"
+          echo "new version is:
+          echo $new_version
           echo "VERSION=$new_version" >> $GITHUB_ENV
         
         # Create Release
