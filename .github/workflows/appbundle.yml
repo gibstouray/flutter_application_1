@@ -114,7 +114,6 @@ jobs:
         with:
           artifacts: "build/app/outputs/bundle/release/app-release.aab"
           #tag: v${{ env.VERSION }}
-          tag: "1.5.2"
           tag: "v1.0.0-${{ github.run_number }}"
           name: "Release v1.0.0-${{ github.run_number }}"
           body: "Release of version v1.0.0-${{ github.run_number }}"
