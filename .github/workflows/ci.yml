@@ -116,8 +116,8 @@ jobs:
         
         # Create Release
       - name: Create Release
-        uses: ncipollo/release-action@v4
+        uses: ncipollo/release-action@v1.12.0
         with:
           artifacts: "build/ios_build.tar.gz"
           tag: v${{ env.VERSION }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
