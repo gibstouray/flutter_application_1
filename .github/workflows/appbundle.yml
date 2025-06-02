@@ -5,8 +5,8 @@ name: appbundle
 on:
   workflow_dispatch: {}
   #push:
-  #  branches:
-  #    - dev
+    branches:
+      - dev
 
 jobs:
   flutter_test:
