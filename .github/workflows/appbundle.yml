@@ -114,5 +114,10 @@ jobs:
         with:
           artifacts: "build/app/outputs/bundle/release/app-release.aab"
           #tag: v${{ env.VERSION }}
+      
+      - name: Echo Version
+        run: echo "Version: ${{ env.VERSION }}"
+        
+    
           tag: "v1.5.0"
           token: ${{ secrets.GITHUB_TOKEN }}
