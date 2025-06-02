@@ -78,7 +78,7 @@ jobs:
           flutter build appbundle
           
       - name: upload bundle artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           path: |
             build/app/outputs/bundle/release/app-release.aab
@@ -100,7 +100,7 @@ jobs:
             echo "TAG_EXISTS=false" >> $GITHUB_ENV
           fi
 
-        #12 Modify Tag if it Exists
+      # Modify Tag if it Exists
       - name: Modify Tag
         if: env.TAG_EXISTS == 'true'
         id: modify_tag
@@ -108,10 +108,11 @@ jobs:
           new_version="${{ env.VERSION }}-build-${{ github.run_number }}"
           echo "VERSION=$new_version" >> $GITHUB_ENV
         
-        # Create Release
+      # Create Release
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           artifacts: "build/app/outputs/bundle/release/app-release.aab"
-          tag: v${{ env.VERSION }}
+          #tag: v${{ env.VERSION }}
+          tag: "v1.5.0"
           token: ${{ secrets.GITHUB_TOKEN }}
