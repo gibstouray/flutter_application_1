@@ -105,9 +105,6 @@ jobs:
           new_version="${{ env.VERSION }}-build-${{ github.run_number }}"
           echo "VERSION=$new_version" >> $GITHUB_ENV
 
-      - name: Echo Version
-        run: echo "Version: ${{ env.VERSION }}"
-          
       # Create Release
       - name: Create Release
         uses: ncipollo/release-action@v1
