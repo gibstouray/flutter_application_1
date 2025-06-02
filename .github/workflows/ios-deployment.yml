@@ -16,11 +16,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: cache pub dependencies
-        uses: actions/cache@v4
-        with: 
-          path:  ~/.pub-cache
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
+      #- name: cache pub dependencies
+      #  uses: actions/cache@v4
+      #  with: 
+      #    path:  ~/.pub-cache
+      #    key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
 
       - name: Set up JDK
         uses: actions/setup-java@v2
@@ -52,12 +52,12 @@ jobs:
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties:
           echo "storeFile=keystore.jks" >> android/key.properties
-  
-  build_appbundle:
-    name: Build Android App Bundle
+        
+  build_ios:
+    name: Build flutter IOS
     needs: [flutter_test]
 
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -75,22 +75,28 @@ jobs:
       - run: |
           flutter pub get
           flutter clean 
-          flutter build appbundle
-          
-      - name: upload bundle artifacts
+          flutter build ios --no-codesign
+
+      - name: Create tar.gz of iOS build
+        run: |
+          mkdir -p build
+          tar -czf build/ios_build.tar.gz build/ios/iphoneos/*.app
+      
+      - name: upload IOS build artifacts
         uses: actions/upload-artifact@v4
         with:
+          name: Releases
           path: |
-            build/app/outputs/bundle/release/app-release.aab
-          if-no-files-found: error # Fail the job if no files are found
+            build/ios_build.tar.gz
 
-      # Extract Version
+       # Extract Version
       - name: Extract version from pubspec.yaml
         id: extract_version
         run: |
           version=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2 | tr -d '\r')
           echo "VERSION=$version" >> $GITHUB_ENV
 
+        # Check if Tag Exists
       - name: Check if Tag Exists
         id: check_tag
         run: |
@@ -100,22 +106,18 @@ jobs:
             echo "TAG_EXISTS=false" >> $GITHUB_ENV
           fi
 
-      # Modify Tag if it Exists
+        # Modify Tag if it Exists
       - name: Modify Tag
         if: env.TAG_EXISTS == 'true'
         id: modify_tag
         run: |
           new_version="${{ env.VERSION }}-build-${{ github.run_number }}"
           echo "VERSION=$new_version" >> $GITHUB_ENV
-
-      - name: Echo Version
-        run: echo "Version: ${{ env.VERSION }}"
-          
-      # Create Release
+        
+        # Create Release
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "build/app/outputs/bundle/release/app-release.aab"
-          #tag: v${{ env.VERSION }}
-          tag: "v1.5.0"
+          artifacts: "build/ios_build.tar.gz"
+          tag: v${{ env.VERSION }}
           token: ${{ secrets.GITHUB_TOKEN }}
