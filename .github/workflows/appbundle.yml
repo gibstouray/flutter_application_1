@@ -91,7 +91,6 @@ jobs:
           version=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2 | tr -d '\r')
           echo "VERSION=$version" >> $GITHUB_ENV
 
-        # Check if Tag Exists
       - name: Check if Tag Exists
         id: check_tag
         run: |
@@ -101,7 +100,7 @@ jobs:
             echo "TAG_EXISTS=false" >> $GITHUB_ENV
           fi
 
-        # Modify Tag if it Exists
+        #12 Modify Tag if it Exists
       - name: Modify Tag
         if: env.TAG_EXISTS == 'true'
         id: modify_tag
@@ -109,26 +108,10 @@ jobs:
           new_version="${{ env.VERSION }}-build-${{ github.run_number }}"
           echo "VERSION=$new_version" >> $GITHUB_ENV
         
-      - name: Check if tag exists
-        id: check_tag_exists 
-        run: |
-          if git tag -l | grep -q "v0.1.0"; then
-            echo "TAG_EXISTS=true" >> $GITHUB_ENV
-          else
-            echo "TAG_EXISTS=false" >> $GITHUB_ENV
-            echo $GITHUB_ENV
-          fi
-
         # Create Release
       - name: Create Release
-        # if: steps.check_tag_exists.outputs.TAG_EXISTS == 'false'
         uses: ncipollo/release-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          # tag: v${{ env.VERSION }}
-          tag_name: v${{env.VERSION}}-${{ github.run_id }}
-          release_name: "Release v1.0.0-${{ github.run_id }}"
-          body: "Release for version ${{ env.VERSION }}"
           artifacts: "build/app/outputs/bundle/release/app-release.aab"
-          # token: ${{ secrets.GITHUB_TOKEN }}
+          tag: v${{ env.VERSION }}
+          token: ${{ secrets.GITHUB_TOKEN }}
