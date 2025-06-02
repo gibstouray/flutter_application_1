@@ -16,6 +16,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: cache pub dependencies
+        uses: actions/cache@v2
+        with: 
+          path:  ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
+
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
@@ -82,72 +88,16 @@ jobs:
           name: Releases
           path: |
             build/ios_build.tar.gz
-    
-  build_appbundle:
-    name: Build Android App Bundle
-    needs: [flutter_test]
 
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'temurin' # Use 'temurin' for OpenJDK 17
+       # Extract Version
+      - name: Extract version from pubspec.yaml
+        id: extract_version
+        run: |
+          version=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2 | tr -d '\r')
+          echo "VERSION=$version" >> $GITHUB_ENV
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2 # will allow you to run flutter commands
-        with:
-          channel: 'stable' # Use 'stable' channel for production-ready Flutter SDK
-      - run: |
-          flutter pub get
-          flutter clean 
-          flutter build appbundle
-          
-      - name: upload bundle artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          path: |
-            build/app/outputs/bundle/release/app-release.aab
-          if-no-files-found: error # Fail the job if no files are found
-
-  
-  build_apk:
-    name: Build flutter Android apk
-    needs: [flutter_test]
-
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'temurin' # Use 'temurin' for OpenJDK 17
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2 # will allow you to run flutter commands
-        with:
-          channel: 'stable' # Use 'stable' channel for production-ready Flutter SDK
-      - run: |
-          flutter pub get
-          flutter clean 
-          flutter build apk --release
-          
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: error # Fail the job if no files are found
-      
-      - name: check if Tag Exists
+        # Check if Tag Exists
+      - name: Check if Tag Exists
         id: check_tag
         run: |
           if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
@@ -156,22 +106,18 @@ jobs:
             echo "TAG_EXISTS=false" >> $GITHUB_ENV
           fi
 
+        # Modify Tag if it Exists
       - name: Modify Tag
         if: env.TAG_EXISTS == 'true'
         id: modify_tag
         run: |
           new_version="${{ env.VERSION }}-build-${{ github.run_number }}"
           echo "VERSION=$new_version" >> $GITHUB_ENV
-
+        
+        # Create Release
       - name: Create Release
-        if: env.TAG_EXISTS == 'true'
-        uses: softprops/action-gh-release@v1
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: ${{ github.ref_name }}
-          files: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/bundle/release/app-release.aab
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ env.VERSION }}
+          artifacts: "build/ios_build.tar.gz"
+          tag: v${{ env.VERSION }}
+          token: ${{ secrets.TOKEN }}
