@@ -78,7 +78,7 @@ jobs:
           flutter build appbundle
           
       - name: upload bundle artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v2
         with:
           path: |
             build/app/outputs/bundle/release/app-release.aab
@@ -102,7 +102,7 @@ jobs:
 
         #12 Modify Tag if it Exists
       - name: Modify Tag
-        if: check_tag.outputs.TAG_EXISTS == 'true'
+        if: env.TAG_EXISTS == 'true'
         id: modify_tag
         run: |
           new_version="${{ env.VERSION }}-build-${{ github.run_number }}"
