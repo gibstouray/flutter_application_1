@@ -1,0 +1,120 @@
+name: ci
+on:
+  workflow-dispatch: {}
+  push:
+    branches:
+      - dev
+
+jobs:
+  flutter_test:
+    name: Run flutter test and analyze
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: cache pub dependencies
+        uses: actions/cache@v4
+        with: 
+          path:  ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin' # Use 'temurin' for OpenJDK 17
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2 # will allow you to run flutter commands
+        with:
+          flutter-version: '3.7.0'
+          channel: 'stable' # Use 'stable' channel for production-ready Flutter SDK
+
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Analyze code
+        run: flutter analyze  
+
+      - name: Run tests
+        run: flutter test 
+
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+
+      - name: create key.properties
+        run: |
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties:
+          echo "storeFile=keystore.jks" >> android/key.properties
+  
+  build_appbundle:
+    name: Build Android App Bundle
+    needs: [flutter_test]
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin' # Use 'temurin' for OpenJDK 17
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2 # will allow you to run flutter commands
+        with:
+          channel: 'stable' # Use 'stable' channel for production-ready Flutter SDK
+      - run: |
+          flutter pub get
+          flutter clean 
+          flutter build appbundle
+          
+      - name: upload bundle artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error # Fail the job if no files are found
+
+      # Extract Version
+      - name: Extract version from pubspec.yaml
+        id: extract_version
+        run: |
+          version=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2 | tr -d '\r')
+          echo "VERSION=$version" >> $GITHUB_ENV
+
+      - name: Check if Tag Exists
+        id: check_tag
+        run: |
+          if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
+            echo "TAG_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "TAG_EXISTS=false" >> $GITHUB_ENV
+          fi
+
+      # Modify Tag if it Exists
+      - name: Modify Tag
+        if: env.TAG_EXISTS == 'true'
+        id: modify_tag
+        run: |
+          new_version="${{ env.VERSION }}-build-${{ github.run_number }}"
+          echo "VERSION=$new_version" >> $GITHUB_ENV
+
+      - name: Echo Version
+        run: echo "Version: ${{ env.VERSION }}"
+          
+      # Create Release
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/app/outputs/bundle/release/app-release.aab"
+          #tag: v${{ env.VERSION }}
+          tag: "v1.0.0-${{ github.run_number }}"
+          name: "Release v1.0.0-${{ github.run_number }}"
+          body: "Release of version v1.0.0-${{ github.run_number }}"
+          #token: ${{ secrets.GITHUB_TOKEN }}
