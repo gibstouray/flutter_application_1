@@ -4,7 +4,7 @@ name: appbundle
 # It will also cache pub dependencies and set up the JDK and Flutter environment.
 on:
   workflow_dispatch:
-  #push:
+  push:
     branches:
       - dev
 
@@ -114,6 +114,7 @@ jobs:
         with:
           artifacts: "build/app/outputs/bundle/release/app-release.aab"
           #tag: v${{ env.VERSION }}
+          tag: "1.5.2"
           tag: "v1.0.0-${{ github.run_number }}"
           name: "Release v1.0.0-${{ github.run_number }}"
           body: "Release of version v1.0.0-${{ github.run_number }}"
