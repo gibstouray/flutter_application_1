@@ -121,7 +121,7 @@ jobs:
 
         # Create Release
       - name: Create Release
-        if: steps.check_tag_exists.outputs.TAG_EXISTS == 'false'
+        #if: steps.check_tag_exists.outputs.TAG_EXISTS == 'false'
         uses: ncipollo/release-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
