@@ -3,7 +3,7 @@ name: appbundle
 # It will also create a release with the built app bundle.
 # It will also cache pub dependencies and set up the JDK and Flutter environment.
 on:
-  workflow_dispatch: {}
+  workflow_dispatch: {} # for testing purposes, we manually trigger the workflow
   push:
     branches:
       - dev
@@ -26,13 +26,13 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'
-          distribution: 'temurin' # Use 'temurin' for OpenJDK 17
+          distribution: 'temurin' 
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2 # will allow you to run flutter commands
+        uses: subosito/flutter-action@v2 # this action allows you to run flutter commands
         with:
           flutter-version: '3.7.0'
-          channel: 'stable' # Use 'stable' channel for production-ready Flutter SDK
+          channel: 'stable' 
 
       - name: Install dependencies
         run: flutter pub get
@@ -53,10 +53,8 @@ jobs:
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties:
           echo "storeFile=keystore.jks" >> android/key.properties
   
-  build_appbundle:
+  build:
     name: Build Android App Bundle
-    needs: [flutter_test]
-
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -66,12 +64,12 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'
-          distribution: 'temurin' # Use 'temurin' for OpenJDK 17
+          distribution: 'temurin' 
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2 # will allow you to run flutter commands
+        uses: subosito/flutter-action@v2 # this action allows you to run flutter commands
         with:
-          channel: 'stable' # Use 'stable' channel for production-ready Flutter SDK
+          channel: 'stable' 
       - run: |
           flutter pub get
           flutter clean 
@@ -119,3 +117,25 @@ jobs:
           name: "Release v1.0.0-${{ github.run_number }}"
           body: "Release of version v1.0.0-${{ github.run_number }}"
           #token: ${{ secrets.GITHUB_TOKEN }}
+  # deploy:
+  #   name: Deploy Android Build
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v1
+  #   - name: Get Android Build from artifacts
+  #     uses: actions/download-artifact@v2
+  #     with:
+  #       name: android-release
+  #   - name: Release Build to internal track
+  #     uses: r0adkll/upload-google-play@v1
+  #     with:
+  #       serviceAccountJsonPlainText: ${{ secrets.PLAYSTORE_ACCOUNT_KEY }}
+  #       packageName: <YOUR_PACKAGE_NAME>
+  #       releaseFiles: app-release.aab
+  #       track: alpha
+  #       status: completed      
+      
+    
+    
+        
